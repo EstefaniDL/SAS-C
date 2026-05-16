@@ -1,0 +1,111 @@
+/* Código generado (IMPORT) */
+/* Archivo de origen: Work Productivity.csv */
+/* Ruta de origen: /home/u64300067/Proyecto regresión */
+/* Código generado el: 9/5/26 12:07 */
+
+%web_drop_table(WORK.IMPORT);
+
+
+FILENAME REFFILE '/home/u64300067/Proyecto regresión/Work Productivity.csv';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=CSV
+	OUT=WORK.IMPORT;
+	GETNAMES=YES;
+RUN;
+
+PROC CONTENTS DATA=WORK.IMPORT; RUN;
+
+/*-------- Planteamiento del problema ---------*/
+
+%web_open_table(WORK.IMPORT);
+ /* Tipos de datos*/
+PROC CONTENTS DATA=WORK.IMPORT;
+RUN;
+
+ /* Estadistica descriptiva */
+PROC MEANS DATA=WORK.IMPORT N MEAN STD MIN MAX;
+RUN;
+
+ /*Variables categoricas*/
+PROC FREQ DATA=WORK.IMPORT;
+TABLES Gender Country Job_Role Work_Environment;
+RUN;
+
+ /* Valores faltantes */
+PROC MEANS DATA=WORK.IMPORT NMISS;
+RUN;
+
+
+PROC FREQ DATA=WORK.IMPORT;
+TABLES Stress_Level;
+RUN;
+
+PROC GLM DATA=WORK.IMPORT;
+CLASS Stress_Level;
+MODEL Productivity_Score = Stress_Level Sleep_Hours Work_Hours_Per_Day;
+RUN;
+
+PROC MEANS DATA=WORK.IMPORT N MEAN STD MIN MAX;
+RUN;
+
+PROC FREQ DATA=WORK.IMPORT;
+TABLES Gender Country Job_Role Work_Environment Stress_Level Burnout_Risk;
+RUN;
+
+PROC SGPLOT DATA=WORK.IMPORT;
+VBOX Work_Hours_Per_Day;
+RUN;
+
+PROC SGPLOT DATA=WORK.IMPORT;
+VBOX Sleep_Hours;
+RUN;
+
+PROC SGPLOT DATA=WORK.IMPORT;
+VBOX Screen_Time_Hours;
+RUN;
+
+PROC SGPLOT DATA=WORK.IMPORT;
+VBOX Productivity_Score;
+RUN;
+
+PROC UNIVARIATE DATA=WORK.IMPORT;
+VAR Work_Hours_Per_Day Sleep_Hours Screen_Time_Hours Productivity_Score;
+RUN;
+
+/*----------Especificacicaciòn del modelo---------*/
+
+PROC GLM DATA=WORK.IMPORT;
+CLASS Stress_Level;
+MODEL Productivity_Score = Stress_Level Sleep_Hours Work_Hours_Per_Day;
+OUTPUT OUT=diagnosticos
+    R=residuos
+    P=predichos;
+RUN;
+QUIT;
+
+PROC SGPLOT DATA=diagnosticos;
+SCATTER X=predichos Y=residuos;
+REFLINE 0 / AXIS=Y;
+RUN;
+
+PROC REG DATA=WORK.IMPORT;
+MODEL Productivity_Score = Sleep_Hours Work_Hours_Per_Day / DW;
+RUN;
+QUIT;
+
+PROC SGPLOT DATA=diagnosticos;
+SCATTER X=predichos Y=residuos;
+REFLINE 0 / AXIS=Y;
+RUN;
+
+PROC UNIVARIATE DATA=diagnosticos NORMAL;
+VAR residuos;
+HISTOGRAM residuos / NORMAL;
+QQPLOT residuos / NORMAL(MU=EST SIGMA=EST);
+RUN;
+
+/*-------------Estimaciòn del modelo-------------*/
+
+
+
