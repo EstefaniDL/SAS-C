@@ -16,7 +16,7 @@ RUN;
 
 PROC CONTENTS DATA=WORK.IMPORT; RUN;
 
-/*-------- Planteamiento del problema ---------*/
+/*-------- 1.- Planteamiento del problema ---------*/
 
 %web_open_table(WORK.IMPORT);
  /* Tipos de datos*/
@@ -73,7 +73,7 @@ PROC UNIVARIATE DATA=WORK.IMPORT;
 VAR Work_Hours_Per_Day Sleep_Hours Screen_Time_Hours Productivity_Score;
 RUN;
 
-/*----------Especificacicaciòn del modelo---------*/
+/*---------- 2.-Especificacicaciòn del modelo ---------*/
 
 PROC GLM DATA=WORK.IMPORT;
 CLASS Stress_Level;
@@ -105,7 +105,68 @@ HISTOGRAM residuos / NORMAL;
 QQPLOT residuos / NORMAL(MU=EST SIGMA=EST);
 RUN;
 
-/*-------------Estimaciòn del modelo-------------*/
+/*------------- 3.-Estimaciòn del modelo -------------*/
 
 
+PROC GLM DATA=WORK.IMPORT;
+CLASS Stress_Level;
+
+MODEL Productivity_Score =
+    Stress_Level
+    Sleep_Hours
+    Work_Hours_Per_Day
+    Exercise_Hours_Per_Week
+    Screen_Time_Hours
+    Experience_Years
+    Meetings_Per_Day
+    / SOLUTION;
+
+RUN;
+QUIT;
+
+/*------------- 4.-ANOVA -------------*/
+
+
+PROC REG DATA=WORK.IMPORT;
+
+MODEL Productivity_Score =
+    Sleep_Hours
+    Work_Hours_Per_Day
+    Exercise_Hours_Per_Week
+    Screen_Time_Hours
+    Meetings_Per_Day;
+
+RUN;
+QUIT;
+
+/*------------- 5.-Significancia e intevalos -------------*/
+
+PROC REG DATA=WORK.IMPORT;
+
+MODEL Productivity_Score =
+    Sleep_Hours
+    Work_Hours_Per_Day
+    Exercise_Hours_Per_Week
+    Screen_Time_Hours
+    Meetings_Per_Day
+    / CLB;
+
+RUN;
+QUIT;
+
+/*------------- 6.-Bondad de ajuste y correlación -------------*/
+
+PROC CORR DATA=WORK.IMPORT;
+
+VAR Productivity_Score
+    Sleep_Hours
+    Work_Hours_Per_Day
+    Exercise_Hours_Per_Week
+    Screen_Time_Hours
+    Meetings_Per_Day;
+
+RUN;
+
+/*------------- 7.-Mejora del modelo -------------*/
+/* No se necesito hacer nada extra*/
 
